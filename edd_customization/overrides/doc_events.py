@@ -53,53 +53,54 @@ def calcalculate_si_profitability(doc, method):
     doc.db_set("custom_profit_percentage", custom_profit_percentage)
 
 
-def calcalculate_so_profitability(doc, method):
-
+def calculate_so_profitability(doc, method):
     total_cost = 0.0
 
     for item in doc.items:
-        is_stock_item = frappe.db.get_value("Item", item.item_code, "is_stock_item")
-        if not is_stock_item:
+        # 1: Get item details from cache to avoid slowing down the system
+        item_data = frappe.get_cached_value(
+            "Item",
+            item.item_code,
+            ["is_stock_item", "last_purchase_rate"],
+            as_dict=True,
+        )
+
+        # Skip if item doesn't exist or isn't a stock item
+        if not item_data or not item_data.get("is_stock_item"):
             continue
 
-        qty = float(item.get("qty") or 0)
-        valuation_rate = float(item.get("valuation_rate") or 0)
+        qty = float(item.get("qty") or 0.0)
+        valuation_rate = float(item.get("valuation_rate") or 0.0)
 
-        # 1: Last Purchase Rate
+        # 2: Fallback to Last Purchase Rate if valuation_rate is 0
         if not valuation_rate:
-            valuation_rate = float(
-                frappe.db.get_value("Item", item.item_code, "last_purchase_rate") or 0
-            )
-            # item.valuation_rate = valuation_rate
-            # frappe.db.set_value(
-            #     "Sales Order Item", item.name, "valuation_rate", valuation_rate
-            # )
+            valuation_rate = float(item_data.get("last_purchase_rate") or 0.0)
 
-        # 2: Standard Purchase Price List
+        # 3: Fallback to Standard Purchase Price List if still 0
         if not valuation_rate:
             item_price = frappe.db.get_value(
                 "Item Price",
                 {"item_code": item.item_code, "price_list": "شراء القياسية"},
                 "price_list_rate",
             )
-            valuation_rate = float(item_price or 0)
+            valuation_rate = float(item_price or 0.0)
 
         # Calculate line cost and accumulate
         line_cost = qty * valuation_rate
-        total_cost = total_cost + line_cost
+        total_cost += line_cost
 
-    base_net_total = float(doc.get("base_net_total") or 0)
+    # 4: Calculate final profit
+    base_net_total = float(doc.get("base_net_total") or 0.0)
     profit = base_net_total - total_cost
 
-    # Safe division check against total_cost, not base_net_total
-    if total_cost > 0:
-        custom_profit_percentage = (profit / total_cost) * 100
+    # 5: Calculate Gross Profit Margin percentage based on Sales Total, not Cost
+    if base_net_total > 0:
+        custom_profit_percentage = (profit / base_net_total) * 100.0
     else:
         custom_profit_percentage = 0.0
 
+    # Assign the calculated value to the document field
     doc.custom_profit_percentage = custom_profit_percentage
-
-    doc.db_set("custom_profit_percentage", custom_profit_percentage)
 
 
 def set_profit_on_update_after_submit(doc, method):

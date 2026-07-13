@@ -19,7 +19,7 @@ doc_events = {
         "before_save": "edd_customization.overrides.doc_events.calcalculate_si_profitability",
     },
     "Sales Order": {
-        "before_save": "edd_customization.overrides.doc_events.calcalculate_so_profitability",
+        "before_save": "edd_customization.overrides.doc_events.calculate_so_profitability",
         "on_update_after_submit": "edd_customization.overrides.doc_events.set_profit_on_update_after_submit",
     },
 }

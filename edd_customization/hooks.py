@@ -8,7 +8,22 @@ app_license = "mit"
 # Apps
 # ------------------
 
-# required_apps = []
+required_apps = ["frappe", "erpnext"]
+fixtures = [
+    {"dt": "Custom Field", "filters": [["module", "=", "Edd Customization"]]},
+]
+doctype_js = {"Sales Invoice": "public/js/sales_invoice.js"}
+
+doc_events = {
+    "Sales Invoice": {
+        "before_save": "edd_customization.overrides.doc_events.calcalculate_si_profitability",
+    },
+    "Sales Order": {
+        "before_save": "edd_customization.overrides.doc_events.calcalculate_so_profitability",
+        "on_update_after_submit": "edd_customization.overrides.doc_events.set_profit_on_update_after_submit",
+    },
+}
+
 
 # Each item in the list will be shown as an app in the apps page
 # add_to_apps_screen = [
@@ -43,7 +58,6 @@ app_license = "mit"
 # page_js = {"page" : "public/js/file.js"}
 
 # include js in doctype views
-doctype_js = {"Sales Invoice": "public/js/sales_invoice.js"}
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
@@ -137,13 +151,6 @@ doctype_js = {"Sales Invoice": "public/js/sales_invoice.js"}
 # ---------------
 # Hook on document methods and events
 
-doc_events = {
-    "Sales Invoice": {
-        "before_save": "edd_customization.overrides.doc_events.calcalculate_si_profitability",
-        # "on_cancel": "method",
-        # "on_trash": "method",
-    }
-}
 
 # Scheduled Tasks
 # ---------------

@@ -173,3 +173,23 @@ def get_last_customer_item_rate(customer, item_code):
         (customer, item_code),
         as_dict=True,
     )
+
+
+@frappe.whitelist()
+def get_last_selling_rate(customer, item_code):
+    result = frappe.db.sql(
+        """
+        SELECT sii.rate 
+        FROM `tabSales Invoice Item` sii
+        JOIN `tabSales Invoice` si ON si.name = sii.parent
+        WHERE si.customer = %s 
+          AND sii.item_code = %s 
+          AND si.docstatus = 1
+        ORDER BY si.posting_date DESC, si.creation DESC
+        LIMIT 1
+    """,
+        (customer, item_code),
+        as_dict=True,
+    )
+
+    return result[0].rate if result else None

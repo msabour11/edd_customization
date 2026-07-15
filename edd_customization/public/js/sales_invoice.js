@@ -1,12 +1,19 @@
 frappe.ui.form.on("Sales Invoice", {
 	refresh(frm) {},
+	customer: function (frm) {
+		if (frm.doc.items && frm.doc.items.length) {
+			frm.doc.items.forEach((item) => {
+				fetch_last_rate(frm, item.doctype, item.name);
+			});
+		}
+	},
 	set_warehouse(frm) {
 		update_items_valuation_rate(frm);
 	},
 });
 
 frappe.ui.form.on("Sales Invoice Item", {
-	item_code(frm, cdt, cdn) {
+	item_code: function (frm, cdt, cdn) {
 		let row = locals[cdt][cdn];
 		if (row.item_code) {
 			setTimeout(() => {
@@ -27,20 +34,37 @@ frappe.ui.form.on("Sales Invoice Item", {
 				},
 			});
 		}
-
-		if (frm.doc.customer) {
-			fetch_last_rate_for_row(frm, cdt, cdn);
-		}
+		fetch_last_rate(frm, cdt, cdn);
 	},
-
 	warehouse(frm, cdt, cdn) {
 		update_row_valuation_rate(frm, cdt, cdn);
 	},
 });
 
-function update_items_valuation_rate(frm) {
-	(frm.doc.items || []).forEach((row) => {
-		update_row_valuation_rate(frm, row.doctype, row.name);
+function fetch_last_rate(frm, cdt, cdn) {
+	let row = locals[cdt][cdn];
+	if (!frm.doc.customer || !row.item_code) return;
+
+	frappe.call({
+		method: "edd_customization.overrides.doc_events.get_last_selling_rate",
+		args: {
+			customer: frm.doc.customer,
+			item_code: row.item_code,
+		},
+		callback: function (r) {
+			if (r.message) {
+				setTimeout(() => {
+					frappe.model.set_value(cdt, cdn, "rate", r.message);
+				}, 300);
+				frappe.show_alert({
+					message: __("Rate {0} fetched from last invoice", [
+						format_currency(r.message),
+					]),
+					indicator: "green",
+				});
+				console.log("Last Rate:", r.message, typeof r.message);
+			}
+		},
 	});
 }
 
@@ -65,37 +89,14 @@ function update_row_valuation_rate(frm, cdt, cdn) {
 				cdt,
 				cdn,
 				"custom_valuation_rate",
-				r.message ? r.message.valuation_rate || 0 : 0
+				r.message ? r.message.valuation_rate || 0 : 0,
 			);
 		},
 	});
 }
-// fetch last customer rates
-function update_last_customer_rates(frm) {
+
+function update_items_valuation_rate(frm) {
 	(frm.doc.items || []).forEach((row) => {
-		fetch_last_rate_for_row(frm, row.doctype, row.name);
-	});
-}
-
-function fetch_last_rate_for_row(frm, cdt, cdn) {
-	let row = locals[cdt][cdn];
-	if (!row.item_code || !frm.doc.customer) return;
-
-	frappe.call({
-		method: "edd_customization.overrides.doc_events.get_last_customer_item_rate",
-		args: {
-			customer: frm.doc.customer,
-			item_code: row.item_code,
-		},
-		callback: (r) => {
-			if (r.message && r.message.length) {
-				// frappe.model.set_value(cdt, cdn, "rate", r.message[0].rate);
-				setTimeout(() => {
-					frappe.model.set_value(cdt, cdn, "rate", r.message[0].rate);
-				}, 300);
-
-				console.log("Last Rate:", r.message[0].rate, typeof r.message[0].rate);
-			}
-		},
+		update_row_valuation_rate(frm, row.doctype, row.name);
 	});
 }

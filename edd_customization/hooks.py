@@ -11,6 +11,7 @@ app_license = "mit"
 required_apps = ["frappe", "erpnext"]
 fixtures = [
     {"dt": "Custom Field", "filters": [["module", "=", "Edd Customization"]]},
+    {"dt": "Property Setter", "filters": [["module", "=", "Edd Customization"]]},
 ]
 doctype_js = {"Sales Invoice": "public/js/sales_invoice.js"}
 

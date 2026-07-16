@@ -1,0 +1,18 @@
+[
+ {
+  "default_value": null,
+  "doc_type": "Sales Invoice",
+  "docstatus": 0,
+  "doctype": "Property Setter",
+  "doctype_or_field": "DocField",
+  "field_name": "naming_series",
+  "is_system_generated": 0,
+  "modified": "2026-07-16 17:59:26.854291",
+  "module": "Edd Customization",
+  "name": "Sales Invoice-naming_series-Options",
+  "property": "options",
+  "property_type": "Text",
+  "row_name": null,
+  "value": "INV-MR-PRJ-.YYYY.-\nINV-MR-ONL-.YYYY.-\nINV-AT-JEDW-.YYYY.-\nINV-AT-AMM-.YYYY.-\nINV-AT-SQ7-.YYYY.-\nINV-AT-CSH-.YYYY.-\nINV-AT-RUHW-.YYYY.-\nINV-AT-JEDP-.YYYY.-\nINV-AT-SALLA-.YYYY.-"
+ }
+]

@@ -115,7 +115,7 @@ function apply_custom_naming_series(frm) {
 				case "مبيعات مشاريع الرياض":
 					frm.set_value("naming_series", "INV-MR-PRJ-.YYYY.-");
 					break;
-				case "مبيعات اون لاين موارد (الربط مع منصة نون وامازون وترينديول)":
+				case "مبيعات اون لاين موارد":
 					frm.set_value("naming_series", "INV-MR-ONL-.YYYY.-");
 					break;
 				default:
@@ -145,7 +145,7 @@ function apply_custom_naming_series(frm) {
 				case "مبيعات مشاريع جده":
 					frm.set_value("naming_series", "INV-AT-JEDP-.YYYY.-");
 					break;
-				case "مبيعات اون لاين جده (الربط مع موقع مبيعات سلة الخاص بالشركة)":
+				case "مبيعات اون لاين جده":
 					frm.set_value("naming_series", "INV-AT-SALLA-.YYYY.-");
 					break;
 				default:
